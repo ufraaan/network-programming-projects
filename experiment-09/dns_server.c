@@ -23,21 +23,48 @@ int main() {
     socklen_t len;
     int found;
 
+    memset(&server, 0, sizeof(server));
+    memset(&client, 0, sizeof(client));
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        perror("socket");
+        return 1;
+    }
 
     server.sin_family = AF_INET;
     server.sin_port = htons(8080);
     server.sin_addr.s_addr = INADDR_ANY;
+#ifdef __APPLE__
+    server.sin_len = sizeof(server);
+#endif
 
-    bind(sockfd, (struct sockaddr*)&server, sizeof(server));
-    listen(sockfd, 5);
+    if (bind(sockfd, (struct sockaddr*)&server, sizeof(server)) < 0) {
+        perror("bind");
+        close(sockfd);
+        return 1;
+    }
+
+    if (listen(sockfd, 5) < 0) {
+        perror("listen");
+        close(sockfd);
+        return 1;
+    }
     printf("DNS Server is running...\n");
 
     while (1) {
         len = sizeof(client);
         new_sock = accept(sockfd, (struct sockaddr*)&client, &len);
+        if (new_sock < 0) {
+            perror("accept");
+            continue;
+        }
 
         int bytes = recv(new_sock, buffer, sizeof(buffer) - 1, 0);
+        if (bytes < 0) {
+            perror("recv");
+            close(new_sock);
+            continue;
+        }
         buffer[bytes] = '\0';
         printf("Client requested: %s\n", buffer);
 
@@ -52,7 +79,9 @@ int main() {
 
         if (!found) {
             char msg[] = "Domain not found";
-            send(new_sock, msg, strlen(msg), 0);
+            if (send(new_sock, msg, strlen(msg), 0) < 0) {
+                perror("send");
+            }
         }
 
         close(new_sock);
