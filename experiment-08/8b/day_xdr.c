@@ -6,10 +6,12 @@
 #include "day.h"
 
 bool_t
-xdr_time_out(XDR *xdrs, time_out *objp)
+xdr_time_out(xdrs, objp)
+	XDR *xdrs;
+	time_out *objp;
 {
 
-	if (!xdr_string(xdrs, &objp->current_time, 64))
+	if (!xdr_string(xdrs, &objp->current_time, 100))
 		return (FALSE);
 	return (TRUE);
 }

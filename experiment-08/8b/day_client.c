@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     time_out *result;
 
     if (argc != 2) {
-        fprintf(stderr, "Usage: %s <server_host>\n", argv[0]);
+        printf("Usage: %s <server_host>\n", argv[0]);
         exit(1);
     }
 
@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
-    result = gettime_1(clnt);   /* matches: time_out * gettime_1(CLIENT *) */
+    result = gettime_1(NULL, clnt);
     if (result == NULL) {
         clnt_perror(clnt, "RPC call failed");
         clnt_destroy(clnt);

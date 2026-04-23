@@ -24,18 +24,18 @@ bool_t xdr_time_out();
 #endif /* Old Style C */
 
 
-#define DAY_PROG ((rpc_uint)0x20000001)
+#define DAY_PROG ((rpc_uint)0x23452222)
 #define DAY_VERS ((rpc_uint)1)
 
 #ifdef __cplusplus
 #define GETTIME ((rpc_uint)1)
-extern "C" time_out * gettime_1(CLIENT *);
-extern "C" time_out * gettime_1_svc(struct svc_req *);
+extern "C" time_out * gettime_1(void *, CLIENT *);
+extern "C" time_out * gettime_1_svc(void *, struct svc_req *);
 
 #elif __STDC__
 #define GETTIME ((rpc_uint)1)
-extern  time_out * gettime_1(CLIENT *);
-extern  time_out * gettime_1_svc(struct svc_req *);
+extern  time_out * gettime_1(void *, CLIENT *);
+extern  time_out * gettime_1_svc(void *, struct svc_req *);
 
 #else /* Old Style C */
 #define GETTIME ((rpc_uint)1)

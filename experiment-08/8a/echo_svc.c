@@ -3,20 +3,14 @@
  * It was generated using rpcgen.
  */
 
-#include "day.h"
+#include "echo.h"
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <rpc/pmap_clnt.h>
-#include <string.h>
 #include <netdb.h>
 #include <signal.h>
 #include <sys/ttycom.h>
-#ifdef __cplusplus
-#include <sysent.h>
-#endif /* __cplusplus */
 #include <memory.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -36,7 +30,8 @@ static int _rpcfdtype;		/* Whether Stream or Datagram ? */
 static int _rpcsvcdirty;	/* Still serving ? */
 
 static
-void _msgout(char* msg)
+void _msgout(msg)
+	char *msg;
 {
 #ifdef RPC_SVC_FG
 	if (_rpcpmstart)
@@ -47,8 +42,6 @@ void _msgout(char* msg)
 	syslog(LOG_ERR, "%s", msg);
 #endif
 }
-
-static void closedown(void);
 
 static void
 closedown()
@@ -72,23 +65,17 @@ closedown()
 	(void) alarm(_RPCSVC_CLOSEDOWN);
 }
 
-static time_out *
-_gettime_1(void  *argp, struct svc_req *rqstp)
-{
-	return(gettime_1_svc(rqstp));
-}
-
-static void day_prog_1(struct svc_req *rqstp, SVCXPRT *transp);
-
 static void
-day_prog_1(struct svc_req *rqstp, SVCXPRT *transp)
+echo_prog_1(rqstp, transp)
+	struct svc_req *rqstp;
+	SVCXPRT *transp;
 {
 	union {
-		int fill;
+		char *echo_1_arg;
 	} argument;
 	char *result;
-	xdrproc_t xdr_argument, xdr_result;
-	char *(*local)(char *, struct svc_req *);
+	bool_t (*xdr_argument)(), (*xdr_result)();
+	char *(*local)();
 
 	_rpcsvcdirty = 1;
 	switch (rqstp->rq_proc) {
@@ -97,10 +84,10 @@ day_prog_1(struct svc_req *rqstp, SVCXPRT *transp)
 		_rpcsvcdirty = 0;
 		return;
 
-	case GETTIME:
-		xdr_argument = (xdrproc_t) xdr_void;
-		xdr_result = (xdrproc_t) xdr_time_out;
-		local = (char *(*)(char *, struct svc_req *)) _gettime_1;
+	case ECHO:
+		xdr_argument = xdr_wrapstring;
+		xdr_result = xdr_wrapstring;
+		local = (char *(*)()) echo_1_svc;
 		break;
 
 	default:
@@ -114,7 +101,7 @@ day_prog_1(struct svc_req *rqstp, SVCXPRT *transp)
 		_rpcsvcdirty = 0;
 		return;
 	}
-	result = (*local)((char *)&argument, rqstp);
+	result = (*local)(&argument, rqstp);
 	if (result != NULL && !svc_sendreply(transp, (xdrproc_t) xdr_result, result)) {
 		svcerr_systemerr(transp);
 	}
@@ -127,10 +114,11 @@ day_prog_1(struct svc_req *rqstp, SVCXPRT *transp)
 }
 
 
-int main( int argc, char* argv[] );
 
 int
-main( int argc, char* argv[] )
+main(argc, argv)
+int argc;
+char *argv[];
 {
 	SVCXPRT *transp = NULL;
 	int sock;
@@ -149,7 +137,7 @@ main( int argc, char* argv[] )
 		sock = 0;
 		_rpcpmstart = 1;
 		proto = 0;
-		openlog("day", LOG_PID, LOG_DAEMON);
+		openlog("echo", LOG_PID, LOG_DAEMON);
 	} else {
 #ifndef RPC_SVC_FG
 		int size;
@@ -173,10 +161,10 @@ main( int argc, char* argv[] )
 			(void) ioctl(i, TIOCNOTTY, (char *)NULL);
 			(void) close(i);
 		}
-		openlog("day", LOG_PID, LOG_DAEMON);
+		openlog("echo", LOG_PID, LOG_DAEMON);
 #endif
 		sock = RPC_ANYSOCK;
-		(void) pmap_unset(DAY_PROG, DAY_VERS);
+		(void) pmap_unset(ECHO_PROG, ECHO_VERS);
 	}
 
 	if ((_rpcfdtype == 0) || (_rpcfdtype == SOCK_DGRAM)) {
@@ -187,8 +175,8 @@ main( int argc, char* argv[] )
 		}
 		if (!_rpcpmstart)
 			proto = IPPROTO_UDP;
-		if (!svc_register(transp, DAY_PROG, DAY_VERS, day_prog_1, proto)) {
-			_msgout("unable to register (DAY_PROG, DAY_VERS, udp).");
+		if (!svc_register(transp, ECHO_PROG, ECHO_VERS, echo_prog_1, proto)) {
+			_msgout("unable to register (ECHO_PROG, ECHO_VERS, udp).");
 			exit(1);
 		}
 	}
@@ -204,8 +192,8 @@ main( int argc, char* argv[] )
 		}
 		if (!_rpcpmstart)
 			proto = IPPROTO_TCP;
-		if (!svc_register(transp, DAY_PROG, DAY_VERS, day_prog_1, proto)) {
-			_msgout("unable to register (DAY_PROG, DAY_VERS, tcp).");
+		if (!svc_register(transp, ECHO_PROG, ECHO_VERS, echo_prog_1, proto)) {
+			_msgout("unable to register (ECHO_PROG, ECHO_VERS, tcp).");
 			exit(1);
 		}
 	}
@@ -215,7 +203,7 @@ main( int argc, char* argv[] )
 		exit(1);
 	}
 	if (_rpcpmstart) {
-		(void) signal(SIGALRM, (SIG_PF) closedown);
+		(void) signal(SIGALRM, (void(*)()) closedown);
 		(void) alarm(_RPCSVC_CLOSEDOWN);
 	}
 	svc_run();
