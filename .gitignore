@@ -1,3 +1,13 @@
 **/*.out
 experiment-08/client
 experiment-08/server
+
+# Compiled C binaries
+experiment-06/udp-client
+experiment-06/udp-server
+experiment-07/exp7a/echo_client
+experiment-07/exp7a/echo_server
+experiment-07/exp7b/time_client
+experiment-07/exp7b/time_server
+experiment-09/dns_client
+experiment-09/dns_server
