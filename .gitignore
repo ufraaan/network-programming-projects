@@ -1,13 +1,20 @@
-**/*.out
-experiment-08/client
-experiment-08/server
+*.out
+*.log
+*.exit
 
-# Compiled C binaries
-experiment-06/udp-client
-experiment-06/udp-server
-experiment-07/exp7a/echo_client
-experiment-07/exp7a/echo_server
-experiment-07/exp7b/time_client
-experiment-07/exp7b/time_server
-experiment-09/dns_client
-experiment-09/dns_server
+**/udp-client
+**/udp-server
+**/echo_client
+**/echo_server
+**/time_client
+**/time_server
+**/dns_client
+**/dns_server
+**/bitstuffing
+**/charstuffing
+**/linkstate
+**/distvector
+**/day_client
+**/day_server
+**/add_client
+**/add_server
